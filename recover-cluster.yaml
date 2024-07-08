@@ -1,0 +1,50 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-ai
+spec:
+  instances: 3
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: 1
+    limits:
+      memory: "128Mi"
+      cpu: 1
+
+  storage:
+    size: 30Gi
+
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://test-backup-k8s/backups
+      wal:
+        compression: gzip
+        encryption: AES256
+      s3Credentials:
+        accessKeyId:
+          name: aws-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: aws-creds
+          key: ACCESS_SECRET_KEY
+    retentionPolicy: "20d"
+
+  bootstrap:
+    recovery:
+      source: <cluster-name-matching-external-clusters>
+
+  externalClusters:
+    - name: <name of backup database to recover from. usually an already existing database"
+      barmanObjectStore:
+        destinationPath: s3://test-backup-k8s/backups
+        s3Credentials:
+          accessKeyId:
+            name: aws-creds
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: aws-creds
+            key: ACCESS_SECRET_KEY
+        wal:
+          maxParallel: 8

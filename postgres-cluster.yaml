@@ -1,0 +1,39 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example
+spec:
+  instances: 2
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: 1
+    limits:
+      memory: "128Mi"
+      cpu: 1
+
+  storage:
+    size: 250Mi
+
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://test-backup-k8s/backups
+      wal:
+        compression: gzip
+        encryption: AES256
+      data:
+        compression: gzip
+        encryption: AES256
+        immediateCheckpoint: false
+        jobs: 2
+      s3Credentials:
+        accessKeyId:
+          name: aws-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: aws-creds
+          key: ACCESS_SECRET_KEY
+      retentionPolicy: "30d"
+      
+  
